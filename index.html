@@ -103,6 +103,21 @@
       </a-nft>
       <!-- **************************************** -->
 
+      <!-- ******* MARKER MENU ******* -->
+      <a-nft id="markerMenu" type="nft" url="assets/markers/menu">
+
+        <a-entity id="croissant"
+                  gltf-model="assets/models/croissant/scene.gltf"
+                  position="0 50 0"
+                  rotation="-90 0 0"
+                  scale="5 5 5"
+                  visible="false">       
+        </a-entity>
+
+        <a-entity light="type: ambient; intensity: 2"></a-entity>
+      </a-nft>
+      <!-- **************************************** -->
+
       <a-entity camera id="camera"></a-entity>
     </a-scene>
 
@@ -129,6 +144,7 @@
       
         let currentStep = 1;
         let step2ClickCount = 0;
+        let step3ClickCount = 0;
       
         const camera = document.querySelector("#camera");
       
@@ -139,6 +155,10 @@
         // MARKER 2628
         const marker2628 = document.querySelector("#marker2628");
         const ironMan = document.querySelector("#ironMan");
+      
+        // MARKER MENU
+        const markerMenu = document.querySelector("#markerMenu");
+        const croissant = document.querySelector("#croissant");
       
         // UI
         const ui = document.querySelector("#ui");
@@ -153,7 +173,11 @@
          * STEP 1 — TOUCH BOMB
          * ---------------------------------------------------- */
         window.addEventListener("touchstart", (e) => {
-          if (currentStep !== 1) return;
+          console.log("Touch detected! currentStep:", currentStep);
+          if (currentStep !== 1) {
+            console.log("Not step 1, ignoring touch");
+            return;
+          }
       
           const touch = e.touches[0];
           touchPoint.x = (touch.clientX / window.innerWidth) * 2 - 1;
@@ -163,15 +187,18 @@
           raycaster.setFromCamera(touchPoint, cam);
       
           const bombObj = bomb.getObject3D("mesh");
+          console.log("Bomb object:", bombObj);
           if (bombObj) {
             const hitBomb = raycaster.intersectObject(bombObj, true);
+            console.log("Hit bomb?", hitBomb.length > 0);
             if (hitBomb.length > 0) {
-              console.log("Bomb touched!");
+              console.log("💣 Bomb touched!");
               bomb.setAttribute("visible", false);
               explosion.setAttribute("visible", true);
       
               ui.style.display = "flex";
               nextClueBtn.style.display = "block";
+              nextClueBtn.innerText = "Next clue";
             }
           }
         });
@@ -181,7 +208,7 @@
          * NEXT CLUE BUTTON HANDLER
          * ---------------------------------------------------- */
         nextClueBtn.addEventListener("click", () => {
-          console.log("Next clue clicked, currentStep:", currentStep, "step2ClickCount:", step2ClickCount);
+          console.log("Next clue clicked, currentStep:", currentStep, "step2ClickCount:", step2ClickCount, "step3ClickCount:", step3ClickCount);
           
           if (currentStep === 1) {
             // Step 1: Show first clue
@@ -194,7 +221,7 @@
           else if (currentStep === 2 && step2ClickCount === 0) {
             // Step 2: First click - show second clue
             nextClueBtn.style.display = "none";
-            clueText.innerText = "all the emotions in your head";
+            clueText.innerText = "you eat or die";
             clueText.style.display = "block";
             step2ClickCount = 1;
             console.log("Showing emotions clue");
@@ -206,7 +233,7 @@
          * CLUE TEXT HANDLER
          * ---------------------------------------------------- */
         clueText.addEventListener("click", () => {
-          console.log("Clue clicked, currentStep:", currentStep, "step2ClickCount:", step2ClickCount);
+          console.log("Clue clicked, currentStep:", currentStep, "step2ClickCount:", step2ClickCount, "step3ClickCount:", step3ClickCount);
           
           if (currentStep === 1) {
             // Step 1: Move to step 2
@@ -217,13 +244,13 @@
             console.log("Moved to Step 2 - scan marker 2628 now");
           } 
           else if (currentStep === 2 && step2ClickCount === 1) {
-            // Step 2: Complete puzzle
+            // Step 2: Move to step 3
             ui.style.display = "none";
             ironMan.setAttribute("visible", false);
             currentStep = 3;
             step2ClickCount = 0;
             console.log("Puzzle complete!");
-            alert("Puzzle complete! Now scan the next marker.");
+            alert("Treasure hunt complete! 🎉");
           }
         });
       
@@ -262,6 +289,42 @@
         
         marker2628.addEventListener("markerLost", () => {
           console.log("❌ Marker 2628 lost");
+        });
+      
+        /* ----------------------------------------------------
+         * STEP 3 — SCAN MENU MARKER
+         * ---------------------------------------------------- */
+        console.log("markerMenu element:", markerMenu);
+        console.log("Does markerMenu exist?", markerMenu !== null);
+        
+        markerMenu.addEventListener("markerFound", () => {
+          console.log("🎯 MENU MARKER FOUND! currentStep:", currentStep);
+          if (currentStep !== 3) {
+            console.log("⚠️ Ignoring - not on step 3, currentStep is:", currentStep);
+            return;
+          }
+      
+          console.log("✅ Processing Menu marker...");
+          croissant.setAttribute("visible", true);
+      
+          // Show UI again
+          ui.style.display = "flex";
+      
+          // Top text = "Correct movie guessed!"
+          clueText.innerText = "Correct movie guessed!";
+          clueText.style.display = "block";
+      
+          // Button visible
+          nextClueBtn.style.display = "block";
+          nextClueBtn.innerText = "Next clue";
+          
+          // Reset click counter
+          step3ClickCount = 0;
+          console.log("✅ UI should now show 'Correct movie guessed!' and 'Next clue' button");
+        });
+        
+        markerMenu.addEventListener("markerLost", () => {
+          console.log("❌ Menu marker lost");
         });
       
       });
