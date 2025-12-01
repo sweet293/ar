@@ -21,29 +21,73 @@
       arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: true;"
       emitevents="true"
     >
-      <!-- NFT MARKER -->
-      <a-nft
-        type="nft"
-        url="assets/markers/1"
-        smooth="true"
-        smoothCount="10"
-        smoothTolerance="0.01"
-        smoothThreshold="5"
-      >
-        <!-- Visible cube to confirm tracking -->
-        <a-box
-          color="red"
-          position="0 0 0"
-          rotation="0 0 0"
-          scale="80 80 80"
-        ></a-box>
+
+      <a-nft type="nft" url="assets/markers/1">
+
+        <!-- Bomb -->
+        <a-entity id="bomb"
+                  gltf-model="assets/models/stylized_bomb/scene.gltf"
+                  position="0 100 0"
+                  rotation="-90 0 0"
+                  scale="50 50 50"
+                  visible="true">
+        </a-entity>
+
+        <!-- Explosion -->
+        <a-entity id="explosion"
+                  gltf-model="assets/models/explosion_as_solid/scene.gltf"
+                  position="0 100 0"
+                  rotation="-90 0 0"
+                  scale="20 20 20"
+                  visible="false">
+        </a-entity>
 
         <!-- Light -->
-        <a-entity light="type: directional; intensity: 1"></a-entity>
+        <a-entity light="type: ambient; intensity: 2"></a-entity>
+
       </a-nft>
 
-      <!-- Camera -->
-      <a-entity camera></a-entity>
+      <a-entity camera id="camera"></a-entity>
     </a-scene>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+
+        const scene = document.querySelector("a-scene");
+        const camera = document.querySelector("#camera");
+        const bomb = document.querySelector("#bomb");
+        const explosion = document.querySelector("#explosion");
+
+        // THREE.js raycaster + vector
+        const raycaster = new THREE.Raycaster();
+        const touchPoint = new THREE.Vector2();
+
+        // Touch anywhere on screen
+        window.addEventListener("touchstart", (e) => {
+          const touch = e.touches[0];
+
+          // Convert touch coords to normalized device coordinates (-1 to +1)
+          touchPoint.x = (touch.clientX / window.innerWidth) * 2 - 1;
+          touchPoint.y = - (touch.clientY / window.innerHeight) * 2 + 1;
+
+          // Update raycaster
+          raycaster.setFromCamera(touchPoint, camera.getObject3D("camera"));
+
+          // Check intersection with bomb
+          const bombObj = bomb.getObject3D("mesh");
+          if (!bombObj) return;
+
+          const intersects = raycaster.intersectObject(bombObj, true);
+
+          if (intersects.length > 0) {
+            console.log("Touched bomb!");
+            bomb.setAttribute("visible", false);
+            explosion.setAttribute("visible", true);
+          }
+        });
+
+      });
+    </script>
+
   </body>
 </html>
