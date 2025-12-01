@@ -1,0 +1,8 @@
+Model Information:
+* title:	Tony Stark - Iron Man Mark VII
+* source:	https://sketchfab.com/3d-models/tony-stark-iron-man-mark-vii-4059748f2f434478900405fb65418df9
+* author:	Tigerar1 (https://sketchfab.com/allanromanreyes)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

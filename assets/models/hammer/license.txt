@@ -1,0 +1,8 @@
+Model Information:
+* title:	God of War Mjolnir
+* source:	https://sketchfab.com/3d-models/god-of-war-mjolnir-7bc938ebea884eda9aeab9a54e24cb72
+* author:	Dragoon54 (https://sketchfab.com/Dragoon54)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
