@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -55,7 +54,7 @@
       arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: true;"
       emitevents="true"
     >
-      <a-nft type="nft" url="assets/markers/1">
+      <a-nft id="marker1" type="nft" url="assets/markers/1">
 
         <!-- Bomb -->
         <a-entity id="bomb"
@@ -92,7 +91,6 @@
                   debug-bounds>       
         </a-entity>
 
-
         <a-entity id="hammer"
                   gltf-model="assets/models/hammer/scene.gltf"
                   position="0 100 0"
@@ -123,158 +121,151 @@
           });
         }
       });
-      </script>
+    </script>
       
 
-      <script>
-        document.addEventListener("DOMContentLoaded", () => {
-        
-          let currentStep = 1;  
-          // 1 = running marker1 puzzle
-          // 2 = waiting for marker2628
-          // 3 = finished second puzzle
-        
-          const camera = document.querySelector("#camera");
-        
-          // MARKER 1 OBJECTS
-          const bomb = document.querySelector("#bomb");
-          const explosion = document.querySelector("#explosion");
-          const marker1 = document.querySelector("#marker1");
-        
-          // MARKER 2628 OBJECTS
-          const marker2628 = document.querySelector("#marker2628");
-          const ironMan = document.querySelector("#ironMan");
-          const hammer = document.querySelector("#hammer");
-        
-          // UI elements
-          const ui = document.querySelector("#ui");
-          const nextClueBtn = document.querySelector("#nextClueBtn");
-          const clueText = document.querySelector("#clueText");
-        
-          // THREE.js
-          const raycaster = new THREE.Raycaster();
-          const touchPoint = new THREE.Vector2();
-        
-        
-          /* ----------------------------------------------------
-           * ONE SINGLE TOUCH HANDLER FOR ALL CLICKS
-           * ---------------------------------------------------- */
-          window.addEventListener("touchstart", (e) => {
-            const touch = e.touches[0];
-        
-            touchPoint.x = (touch.clientX / window.innerWidth) * 2 - 1;
-            touchPoint.y = -(touch.clientY / window.innerHeight) * 2 + 1;
-        
-            const cam = camera.getObject3D("camera");
-            raycaster.setFromCamera(touchPoint, cam);
-        
-            /* ----------- STEP 1: CLICK BOMB ----------- */
-            if (currentStep === 1) {
-              const bombObj = bomb.getObject3D("mesh");
-              if (bombObj) {
-                const hitBomb = raycaster.intersectObject(bombObj, true);
-                if (hitBomb.length > 0) {
-                  console.log("Touched bomb!");
-        
-                  bomb.setAttribute("visible", false);
-                  explosion.setAttribute("visible", true);
-        
-                  ui.style.display = "flex";
-                  return; // stop
-                }
-              }
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+      
+        let currentStep = 1;
+        let step2ClickCount = 0;
+      
+        const camera = document.querySelector("#camera");
+      
+        // MARKER 1
+        const bomb = document.querySelector("#bomb");
+        const explosion = document.querySelector("#explosion");
+      
+        // MARKER 2628
+        const marker2628 = document.querySelector("#marker2628");
+        const ironMan = document.querySelector("#ironMan");
+      
+        // UI
+        const ui = document.querySelector("#ui");
+        const nextClueBtn = document.querySelector("#nextClueBtn");
+        const clueText = document.querySelector("#clueText");
+      
+        const raycaster = new THREE.Raycaster();
+        const touchPoint = new THREE.Vector2();
+      
+      
+        /* ----------------------------------------------------
+         * STEP 1 — TOUCH BOMB
+         * ---------------------------------------------------- */
+        window.addEventListener("touchstart", (e) => {
+          if (currentStep !== 1) return;
+      
+          const touch = e.touches[0];
+          touchPoint.x = (touch.clientX / window.innerWidth) * 2 - 1;
+          touchPoint.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+      
+          const cam = camera.getObject3D("camera");
+          raycaster.setFromCamera(touchPoint, cam);
+      
+          const bombObj = bomb.getObject3D("mesh");
+          if (bombObj) {
+            const hitBomb = raycaster.intersectObject(bombObj, true);
+            if (hitBomb.length > 0) {
+              console.log("Bomb touched!");
+              bomb.setAttribute("visible", false);
+              explosion.setAttribute("visible", true);
+      
+              ui.style.display = "flex";
+              nextClueBtn.style.display = "block";
             }
-        
-            /* ----------- STEP 2: CLICK IRON MAN ----------- */
-            if (currentStep === 2) {
-              const ironObj = ironMan.object3D;
-              if (ironObj) {
-                const hitIron = raycaster.intersectObject(ironObj, true);
-        
-                console.log("IronMan hit:", hitIron);
-        
-                if (hitIron.length > 0) {
-                  console.log("IRON MAN CLICKED!");
-        
-                  ironMan.setAttribute("visible", false);
-                  hammer.setAttribute("visible", true);
-        
-                  ui.style.display = "flex";
-                  nextClueBtn.style.display = "block";
-                  clueText.style.display = "none";
-                  nextClueBtn.innerText = "Next clue";
-                  clueText.innerText = "all the emotions in your head";
-        
-                  return; // stop
-                }
-              }
-            }
-          });
-        
-        
-        
-          /* ----------------------------------------------------
-           * FIRST NEXT CLUE BUTTON (bomb puzzle)
-           * ---------------------------------------------------- */
-          nextClueBtn.addEventListener("click", () => {
-            nextClueBtn.style.display = "none";
-            clueText.style.display = "block";
-        
-            explosion.setAttribute("visible", false);
-          });
-        
-          /* ----------------------------------------------------
-           * CLICK FIRST CLUE TEXT -> MOVE TO STEP 2
-           * ---------------------------------------------------- */
-          clueText.addEventListener("click", () => {
-            if (currentStep === 1) {
-              ui.style.display = "none";
-              currentStep = 2;
-              alert("Now scan the next marker.");
-            }
-          });
-        
-        
-        
-          /* ----------------------------------------------------
-           * MARKER 2628 LOGIC
-           * ---------------------------------------------------- */
-          marker2628.addEventListener("markerFound", () => {
-            if (currentStep !== 2) return;
-        
-            console.log("Marker 2628 detected");
-        
-            ironMan.setAttribute("visible", true);
-            hammer.setAttribute("visible", false);
-        
-            ui.style.display = "none";
-            nextClueBtn.style.display = "none";
-            clueText.style.display = "none";
-          });
-        
-        
-        
-          /* ----------------------------------------------------
-           * SECOND CLUE BUTTON (after hammer appears)
-           * ---------------------------------------------------- */
-          nextClueBtn.addEventListener("click", () => {
-            if (currentStep !== 2) return;
-        
-            nextClueBtn.style.display = "none";
-            clueText.style.display = "block";
-          });
-        
-          clueText.addEventListener("click", () => {
-            if (currentStep !== 2) return;
-        
-            ui.style.display = "none";
-            currentStep = 3;
-            alert("Puzzle complete. Scan next marker when ready!");
-          });
-        
+          }
         });
-        </script>
+      
+      
+        /* ----------------------------------------------------
+         * NEXT CLUE BUTTON HANDLER
+         * ---------------------------------------------------- */
+        nextClueBtn.addEventListener("click", () => {
+          console.log("Next clue clicked, currentStep:", currentStep, "step2ClickCount:", step2ClickCount);
+          
+          if (currentStep === 1) {
+            // Step 1: Show first clue
+            nextClueBtn.style.display = "none";
+            clueText.innerText = "superhero team from Marvel Comics";
+            clueText.style.display = "block";
+            explosion.setAttribute("visible", false);
+            console.log("Showing Marvel clue");
+          } 
+          else if (currentStep === 2 && step2ClickCount === 0) {
+            // Step 2: First click - show second clue
+            nextClueBtn.style.display = "none";
+            clueText.innerText = "all the emotions in your head";
+            clueText.style.display = "block";
+            step2ClickCount = 1;
+            console.log("Showing emotions clue");
+          }
+        });
+      
+      
+        /* ----------------------------------------------------
+         * CLUE TEXT HANDLER
+         * ---------------------------------------------------- */
+        clueText.addEventListener("click", () => {
+          console.log("Clue clicked, currentStep:", currentStep, "step2ClickCount:", step2ClickCount);
+          
+          if (currentStep === 1) {
+            // Step 1: Move to step 2
+            ui.style.display = "none";
+            clueText.style.display = "none";
+            nextClueBtn.style.display = "none";
+            currentStep = 2;
+            console.log("Moved to Step 2 - scan marker 2628 now");
+          } 
+          else if (currentStep === 2 && step2ClickCount === 1) {
+            // Step 2: Complete puzzle
+            ui.style.display = "none";
+            ironMan.setAttribute("visible", false);
+            currentStep = 3;
+            step2ClickCount = 0;
+            console.log("Puzzle complete!");
+            alert("Puzzle complete! Now scan the next marker.");
+          }
+        });
+      
+      
+        /* ----------------------------------------------------
+         * STEP 2 — SCAN MARKER 2628
+         * ---------------------------------------------------- */
+        console.log("marker2628 element:", marker2628);
+        console.log("Does marker2628 exist?", marker2628 !== null);
         
+        marker2628.addEventListener("markerFound", () => {
+          console.log("🎯 MARKER 2628 FOUND! currentStep:", currentStep);
+          if (currentStep !== 2) {
+            console.log("⚠️ Ignoring - not on step 2, currentStep is:", currentStep);
+            return;
+          }
+      
+          console.log("✅ Processing marker 2628...");
+          ironMan.setAttribute("visible", true);
+      
+          // Show UI again
+          ui.style.display = "flex";
+      
+          // Top text = "Correct movie guessed!"
+          clueText.innerText = "Correct movie guessed!";
+          clueText.style.display = "block";
+      
+          // Button visible
+          nextClueBtn.style.display = "block";
+          nextClueBtn.innerText = "Next clue";
+          
+          // Reset click counter
+          step2ClickCount = 0;
+          console.log("✅ UI should now show 'Correct movie guessed!' and 'Next clue' button");
+        });
+        
+        marker2628.addEventListener("markerLost", () => {
+          console.log("❌ Marker 2628 lost");
+        });
+      
+      });
+    </script>
 
   </body>
 </html>
